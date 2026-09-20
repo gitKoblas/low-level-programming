@@ -61,7 +61,7 @@ void do_experiment(float multiplier, size_t count)
     std::cout << std::setprecision(8);
     std::cout << "Progression of size " << count << " with multiplier " << multiplier<< std::endl;
     std::cout << "Theoretical answer:" <<  g_sum_t(1, multiplier, count)<< std::endl;
-    float sum;
+    volatile float sum; // volatile - to prevent optimizations
     {
         scope_timer _("\tSum");
         sum = g_sum(1, multiplier, count);
