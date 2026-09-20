@@ -35,6 +35,7 @@ using vec_mul_function_ptr = decltype(scalar::vec_mul)*;
 
 constexpr size_t N = 1'000'000;
 int main(){
+    std::cout << "Vector size: " << N << std::endl<< std::endl;
     srand(0);
 
     auto a= make_vector(N);

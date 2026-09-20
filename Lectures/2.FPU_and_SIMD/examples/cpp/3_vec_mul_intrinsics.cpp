@@ -14,7 +14,7 @@ namespace intrinsics {
             r = _mm256_add_ps(r, tmp);
         }
 
-        r = _mm256_hadd_ps(r, r);                 // sum numbers in thr register horizontally
+        r = _mm256_hadd_ps(r, r);                 // sum numbers in the register horizontally
         r = _mm256_hadd_ps(r, r);
         __m128 lo = _mm256_extractf128_ps(r, 0);
         __m128 hi = _mm256_extractf128_ps(r, 1);

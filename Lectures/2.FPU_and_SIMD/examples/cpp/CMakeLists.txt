@@ -2,8 +2,6 @@ project(L2 CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-
-
 add_executable(1_denormals 1_denormals.cpp scope_timer.cpp)
 add_executable(1_denormals_disabled 1_denormals.cpp scope_timer.cpp)
 target_compile_definitions(1_denormals_disabled PRIVATE DISABLE_DENORMALS)
@@ -19,11 +17,15 @@ add_library(3_vec_mul_intrinsics 3_vec_mul_intrinsics.cpp)
 if(MSVC)
     set(FAST_MATH_FLAG /fp:fast)
     set(AVX_FLAG /arch:AVX2)
+    set(NOINLINE /Ob0)
 else()
     set(FAST_MATH_FLAG -ffast-math)
     set(AVX_FLAG -mavx2)
+    set(NOINLINE -fno-inline)
 endif()
 
+target_compile_options(1_denormals PRIVATE ${NOINLINE})
+target_compile_options(1_denormals_disabled PRIVATE ${NOINLINE})
 target_compile_options(3_vec_mul_sse PRIVATE ${FAST_MATH_FLAG} )
 target_compile_options(3_vec_mul_avx PRIVATE ${FAST_MATH_FLAG} ${AVX_FLAG})
 target_compile_options(3_vec_mul_intrinsics PRIVATE ${AVX_FLAG} )

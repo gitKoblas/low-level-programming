@@ -1,7 +1,7 @@
-#include <span>
-#include <vector>
 #include <iostream>
 #include <cmath>
+#include <iomanip>
+
 #include "scope_timer.hpp"
 
 #ifdef DISABLE_DENORMALS
@@ -33,55 +33,49 @@ void enable_ftz_daz(){
 #endif
 
 
-void make_geometric_progression(std::span<float> f, float start_value, float a){
-    float result = start_value;
-    for(auto& x: f)
-        x = result*=a;
+constexpr size_t COUNT  =10000000;
+const float MULTIPLIER1 = 1.0000001;
+const float MULTIPLIER2 = 0.99;
+
+
+float g_sum_t(float start_value, float multiplier, size_t count)
+{
+    return start_value*(1-powf(multiplier, static_cast<float>(count)))/(1-multiplier);
 }
 
-// volatile is used to prevent optimizations
-volatile size_t VECTOR_SIZE = 32ULL*1024*1024;
-volatile float MULTIPLIER1 = 1.00001;
-volatile float MULTIPLIER2 = 0.99999;
-
-
-int main(){
-    auto v = std::vector<float>(VECTOR_SIZE, 0);
+float g_sum(float start_value, float multiplier, size_t count)
+{
+    float a = start_value;
+    float result = 0;
+    for (int i =0; i < count; ++i)
     {
-        scope_timer _{"Ascending progression"};
-        make_geometric_progression(v, 1.0f, MULTIPLIER1);
+        result += a;
+        a*=multiplier;
     }
-    std::cout << "Last element of v:" << v.back()<< std::endl<< std::endl;
+    return result;
+}
 
-#ifdef DISABLE_DENORMALS
-    enable_ftz_daz();
-#endif
 
+void do_experiment(float multiplier, size_t count)
+{
+    std::cout << std::setprecision(8);
+    std::cout << "Progression of size " << count << " with multiplier " << multiplier<< std::endl;
+    std::cout << "Theoretical answer:" <<  g_sum_t(1, multiplier, count)<< std::endl;
+    float sum;
     {
-        scope_timer _{"Descending progression"};
-        make_geometric_progression(v, 1.0f, MULTIPLIER2);
+        scope_timer _("\tSum");
+        sum = g_sum(1, multiplier, count);
     }
-    std::cout << "Last element of v:" << v.back()<< std::endl;
+    std::cout << "Direct sum:" <<  sum << std::endl;
+}
 
-    if (v.back() != 0)
-    {
-        size_t i = 0;
-        for(auto x: v){
-            if(std::fpclassify(x) == FP_SUBNORMAL)
-                break;
-            ++i;
-        }
-        std::cout << "Index of last normalized number:" << i;
-    }
-    else
-    {
-        size_t i = 0;
-        for(auto x: v){
-            if(x == 0)
-                break;
-            ++i;
-        }
-        std::cout << "Index of last non-zero element:" << i;
-    }
+int main()
+{
+    do_experiment(MULTIPLIER1, COUNT);
 
+    #ifdef DISABLE_DENORMALS
+        enable_ftz_daz();
+    #endif
+
+    do_experiment(MULTIPLIER2, COUNT);
 }
