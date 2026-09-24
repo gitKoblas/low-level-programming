@@ -38,7 +38,7 @@ second_circle:
     temp = array[j];
     array[j] = array[j - 1];
     array[j - 1] = temp;
-    swapped = 1;
+    swapped = 1; 
 skip_switching2:
     --j;
     goto second_circle;
